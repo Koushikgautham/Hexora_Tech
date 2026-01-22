@@ -32,15 +32,8 @@ export default function AdminLayout({
         setMounted(true);
     }, []);
 
-    // Redirect if not admin or not logged in
-    React.useEffect(() => {
-        if (!isLoading && (!user || !isAdmin)) {
-            router.push("/auth/login");
-        }
-    }, [user, isAdmin, isLoading, router]);
-
     // Show loading while checking auth
-    if (isLoading || !user || !isAdmin) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <motion.div
@@ -53,6 +46,11 @@ export default function AdminLayout({
                 </motion.div>
             </div>
         );
+    }
+
+    // If not authenticated or not admin, show nothing - middleware will redirect
+    if (!user || !isAdmin) {
+        return null;
     }
 
     return (

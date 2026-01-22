@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { Sun, Moon, ArrowLeft } from "lucide-react";
-import { AuthProvider } from "../../../contexts/AuthContext";
 
 export default function AuthLayout({
     children,
@@ -20,8 +19,7 @@ export default function AuthLayout({
     }, []);
 
     return (
-        <AuthProvider>
-            <div className="min-h-screen bg-background relative overflow-hidden">
+        <div className="min-h-screen bg-background relative overflow-hidden">
                 {/* Animated background gradient orbs */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <motion.div
@@ -144,7 +142,6 @@ export default function AuthLayout({
                 <footer className="relative z-10 text-center py-4 text-sm text-muted-foreground">
                     <p>© {new Date().getFullYear()} Hexora. All rights reserved.</p>
                 </footer>
-            </div>
-        </AuthProvider>
+        </div>
     );
 }

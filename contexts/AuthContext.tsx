@@ -32,22 +32,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Fetch user profile from database
     const fetchProfile = async (userId: string) => {
         try {
+            console.log("🔍 fetchProfile: Starting query for userId:", userId);
+
             const { data, error } = await supabase
                 .from("profiles")
                 .select("*")
                 .eq("id", userId)
                 .single();
 
+            console.log("🔍 fetchProfile: Query completed", {
+                hasData: !!data,
+                hasError: !!error,
+                errorCode: error?.code,
+                errorMessage: error?.message
+            });
+
             if (error) {
-                console.error("Error fetching profile:", error);
+                console.error("❌ Error fetching profile:", error);
                 console.error("User ID:", userId);
                 console.error("Error details:", JSON.stringify(error, null, 2));
                 return null;
             }
 
+            console.log("✅ fetchProfile: Success", data);
             return data as UserProfile;
         } catch (error) {
-            console.error("Exception fetching profile:", error);
+            console.error("❌ Exception fetching profile:", error);
             return null;
         }
     };
@@ -78,12 +88,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log("🔔 Auth state changed:", event, session?.user?.email);
+
             setSession(session);
             setUser(session?.user ?? null);
 
             if (session?.user) {
+                console.log("📋 Fetching profile for:", session.user.id);
                 const profileData = await fetchProfile(session.user.id);
+                console.log("📋 Profile fetched:", {
+                    found: !!profileData,
+                    role: profileData?.role,
+                    email: profileData?.email
+                });
+
                 setProfile(profileData);
+
+                // Handle navigation after successful sign in
+                if (event === 'SIGNED_IN') {
+                    console.log("🔍 Checking if should navigate:", {
+                        event: event,
+                        hasProfile: !!profileData,
+                        role: profileData?.role,
+                        isAdmin: profileData?.role === 'admin'
+                    });
+
+                    if (profileData?.role === 'admin') {
+                        console.log("✅ Navigating to dashboard...");
+                        router.replace('/admin/dashboard');
+                    } else {
+                        console.log("❌ Not admin, role:", profileData?.role);
+                    }
+                }
             } else {
                 setProfile(null);
             }
@@ -92,7 +128,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         return () => subscription.unsubscribe();
-    }, []);
+    }, [router, supabase]);
 
     // Sign in with email and password
     const signIn = async (email: string, password: string) => {
@@ -103,34 +139,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             });
 
             if (error) {
-                console.error("Sign in error:", error);
+                console.error("SignIn error:", error);
                 return { error };
             }
 
-            // Wait for profile to be fetched
+            // Verify profile exists
             if (data.user) {
                 const profileData = await fetchProfile(data.user.id);
-                
+
                 if (!profileData) {
                     console.error("Profile not found for user:", data.user.id);
-                    return { 
-                        error: { 
+                    await supabase.auth.signOut();
+                    return {
+                        error: {
                             message: "Profile not found. Please contact support.",
                             name: "ProfileNotFound",
                             status: 404
-                        } as any 
+                        } as any
                     };
                 }
-                
+
                 setProfile(profileData);
             }
 
-            router.push("/admin/dashboard");
+            // Navigation will happen automatically via onAuthStateChange
             return { error: null };
         } catch (err) {
-            console.error("Sign in exception:", err);
-            return { 
-                error: { 
+            console.error("SignIn exception:", err);
+            return {
+                error: {
                     message: "Failed to sign in. Please try again.",
                     name: "SignInError",
                     status: 500
