@@ -33,15 +33,19 @@ export default function LoginPage() {
     const onSubmit = async (data: LoginFormData) => {
         setIsLoading(true);
         try {
+            console.log("Attempting login for:", data.email);
             const { error } = await signIn(data.email, data.password);
             if (error) {
+                console.error("Login error:", error);
                 toast.error(error.message || "Failed to sign in");
+                setIsLoading(false);
             } else {
                 toast.success("Welcome back!");
+                // Don't set loading to false - let the redirect happen
             }
-        } catch {
+        } catch (err) {
+            console.error("Login exception:", err);
             toast.error("An unexpected error occurred");
-        } finally {
             setIsLoading(false);
         }
     };
