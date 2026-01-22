@@ -1,0 +1,58 @@
+export const team = [
+  {
+    id: 1,
+    name: "Koushik Gautham H",
+    role: "Co-Founder",
+    bio: "Passionate about leveraging technology to drive business growth. Leads strategic initiatives and digital transformation projects for MSMEs.",
+    avatar: "/images/koushik.jpeg",
+    linkedin: "#",
+    twitter: "#",
+  },
+  {
+    id: 2,
+    name: "Pavan Sai HV",
+    role: "Co-Founder",
+    bio: "Technology enthusiast with expertise in building scalable digital solutions. Focused on delivering innovative automation and ecommerce strategies.",
+    avatar: "/images/pavan.jpg",
+    linkedin: "#",
+    twitter: "#",
+  },
+  {
+    id: 3,
+    name: "Abishek Pechiappan",
+    role: "Co-Founder",
+    bio: "Drives operational excellence and client success. Expert in process optimization and implementing efficient digital workflows.",
+    avatar: "/images/abishek.jpeg",
+    linkedin: "#",
+    twitter: "#",
+  },
+  {
+    id: 4,
+    name: "Nand Kishore Rathore",
+    role: "Co-Founder",
+    bio: "Specializes in business development and growth strategies. Committed to helping MSMEs unlock their digital potential.",
+    avatar: "/images/nand.jpg",
+    linkedin: "#",
+    twitter: "#",
+  },
+  {
+    id: 5,
+    name: "Siddharth S",
+    role: "Co-Founder",
+    bio: "Technical architect focused on building robust digital infrastructure. Brings expertise in cloud solutions and system integration.",
+    avatar: "/images/siddharth.jpg",
+    linkedin: "#",
+    twitter: "#",
+  },
+  {
+    id: 6,
+    name: "Jyoti Prakash Behera",
+    role: "Co-Founder",
+    bio: "Creative strategist with a passion for brand building and social media excellence. Drives client engagement and digital marketing initiatives.",
+    avatar: "/images/jyoti.jpg",
+    linkedin: "#",
+    twitter: "#",
+  },
+];
+
+export type TeamMember = (typeof team)[number];
