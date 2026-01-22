@@ -97,10 +97,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Sign in with email and password
     const signIn = async (email: string, password: string) => {
         try {
+            console.log("Step 1: Starting sign in...");
             const { error, data } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             });
+
+            console.log("Step 2: Sign in response:", { error: error?.message, userId: data?.user?.id });
 
             if (error) {
                 console.error("Sign in error:", error);
@@ -109,7 +112,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             // Wait for profile to be fetched
             if (data.user) {
+                console.log("Step 3: Fetching profile for user:", data.user.id);
                 const profileData = await fetchProfile(data.user.id);
+                
+                console.log("Step 4: Profile fetch result:", profileData ? "Success" : "Failed");
                 
                 if (!profileData) {
                     console.error("Profile not found for user:", data.user.id);
@@ -122,9 +128,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     };
                 }
                 
+                console.log("Step 5: Setting profile...");
                 setProfile(profileData);
             }
 
+            console.log("Step 6: Redirecting to dashboard...");
             router.push("/admin/dashboard");
             return { error: null };
         } catch (err) {
