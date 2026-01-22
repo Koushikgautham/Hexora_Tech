@@ -3,8 +3,20 @@
 import * as React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { User, Session, AuthError } from "@supabase/supabase-js";
-import { supabase, UserProfile, UserRole } from "@/lib/supabase";
+import { UserRole } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+
+export interface UserProfile {
+    id: string;
+    email: string;
+    full_name: string | null;
+    role: UserRole;
+    created_at: string;
+    updated_at: string;
+    avatar_url: string | null;
+    is_active: boolean;
+}
 
 interface AuthContextType {
     user: User | null;
@@ -28,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [profile, setProfile] = useState<UserProfile | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const supabase = createClient();
 
     // Fetch user profile from database
     const fetchProfile = async (userId: string) => {

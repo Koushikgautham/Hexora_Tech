@@ -1,31 +1,16 @@
-import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+// DEPRECATED: Use @/lib/supabase/server instead
+// This file is kept for backward compatibility
 
-// Server-side Supabase client that uses cookies for authentication
-export async function createServerClient() {
-  const cookieStore = await cookies();
-  
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+import { createClient as createBrowserClient } from '@supabase/supabase-js';
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      persistSession: false,
-    },
-    global: {
-      headers: {
-        cookie: cookieStore.toString(),
-      },
-    },
-  });
-}
+export { createClient as createServerClient } from './supabase/server';
 
 // Admin client with service role key for privileged operations
 export function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-  return createClient(supabaseUrl, supabaseServiceRoleKey, {
+  return createBrowserClient(supabaseUrl, supabaseServiceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
