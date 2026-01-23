@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ThemeProvider } from "@/providers/theme-provider";
-import { SplashCursor } from "@/components/animations/splash-cursor";
-import { ClickSpark } from "@/components/animations/click-spark";
-import { Toaster } from "sonner";
+import { Providers } from "@/providers/providers";
 import "./globals.css";
-import { ConditionalLayout } from "@/components/layout/conditional-layout";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -74,21 +70,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <ThemeProvider>
-          <SplashCursor />
-          <ClickSpark global sparkColor="var(--primary)" sparkCount={8} sparkRadius={25} duration={400} />
-          <ConditionalLayout>{children}</ConditionalLayout>
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: "hsl(var(--card))",
-                color: "hsl(var(--card-foreground))",
-                border: "1px solid hsl(var(--border))",
-              },
-            }}
-          />
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

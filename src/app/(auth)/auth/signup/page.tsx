@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check } from "lucide-react";
-import { useAuth } from "../../../../../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const signupSchema = z
     .object({

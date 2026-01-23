@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
@@ -12,8 +11,6 @@ import {
     ChevronDown,
     Shield,
     Bell,
-    Menu,
-    X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -23,24 +20,32 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const { user, profile, isAdmin, isLoading, signOut } = useAuth();
-    const router = useRouter();
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = React.useState(false);
     const [userMenuOpen, setUserMenuOpen] = React.useState(false);
+    const [hasRedirected, setHasRedirected] = React.useState(false);
 
     React.useEffect(() => {
         setMounted(true);
     }, []);
 
-    // Redirect if not admin or not logged in
+    // Redirect if not admin or not logged in - but only once loading is complete
     React.useEffect(() => {
-        if (!isLoading && (!user || !isAdmin)) {
-            router.push("/auth/login");
+        // Wait until loading is complete before making decisions
+        if (isLoading) return;
+
+        // Only redirect once
+        if (hasRedirected) return;
+
+        // If no user or not admin, redirect to login
+        if (!user || !isAdmin) {
+            setHasRedirected(true);
+            window.location.href = "/auth/login";
         }
-    }, [user, isAdmin, isLoading, router]);
+    }, [user, isAdmin, isLoading, hasRedirected]);
 
     // Show loading while checking auth
-    if (isLoading || !user || !isAdmin) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <motion.div
@@ -50,6 +55,22 @@ export default function AdminLayout({
                 >
                     <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                     <p className="text-muted-foreground">Loading...</p>
+                </motion.div>
+            </div>
+        );
+    }
+
+    // Show loading while waiting for redirect (user not authorized)
+    if (!user || !isAdmin) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center gap-4"
+                >
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                    <p className="text-muted-foreground">Redirecting...</p>
                 </motion.div>
             </div>
         );

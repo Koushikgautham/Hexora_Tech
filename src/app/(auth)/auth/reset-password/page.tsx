@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Eye, EyeOff, Lock, Loader2, Check, CheckCircle2 } from "lucide-react";
-import { useAuth } from "../../../../../contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 
 const resetPasswordSchema = z
