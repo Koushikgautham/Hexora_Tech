@@ -25,12 +25,12 @@ export default async function NewAdminPage() {
 
     // Not logged in
     if (!profile) {
-        redirect("/auth-login");
+        redirect("/auth/login");
     }
 
     // Logged in but not admin
     if (profile.role !== "admin") {
-        redirect("/auth-unauthorized");
+        redirect("/auth/login");
     }
 
     // User is authenticated admin - render the page

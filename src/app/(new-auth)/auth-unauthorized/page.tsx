@@ -28,7 +28,7 @@ export default function UnauthorizedPage() {
                     </button>
                     <button
                         style={styles.secondaryButton}
-                        onClick={() => window.location.href = "/auth-login"}
+                        onClick={() => window.location.href = "/auth/login"}
                     >
                         Sign in as Admin
                     </button>

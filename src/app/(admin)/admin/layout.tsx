@@ -41,14 +41,14 @@ export default function AdminLayout({
         // If no user, redirect to login
         if (!user) {
             setHasRedirected(true);
-            window.location.href = "/auth-login";
+            window.location.href = "/auth/login";
             return;
         }
 
         // If user exists but not admin, redirect to unauthorized
         if (!isAdmin) {
             setHasRedirected(true);
-            window.location.href = "/auth-unauthorized";
+            window.location.href = "/auth/login";
             return;
         }
     }, [user, isAdmin, isLoading, hasRedirected]);

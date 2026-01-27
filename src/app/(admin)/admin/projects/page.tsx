@@ -7,28 +7,18 @@ import {
     FolderKanban,
     Clock,
     CheckCircle2,
-    Users,
     Calendar,
     MoreVertical,
     Edit,
     Trash2,
     X,
     Loader2,
-    ListTodo,
-    User,
-    TrendingUp,
-    Target,
-    CheckSquare,
-    Square,
-    AlertCircle,
-    FileText,
-    FileSpreadsheet,
+    ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { createClient } from "@/lib/supabase/client";
-import { ProjectDocuments } from "@/components/admin/ProjectDocuments";
-import { ProjectSheets } from "@/components/admin/ProjectSheets";
+import Link from "next/link";
 
 interface Milestone {
     id: string;
@@ -341,7 +331,9 @@ export default function ProjectsPage() {
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
                             onClick={(e) => e.stopPropagation()}
-                            className="bg-card border border-border rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-6 shadow-xl my-8"
+                            className={`bg-card border border-border rounded-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl my-8 ${
+                                showModal === "view-project" ? "max-w-lg" : "max-w-4xl"
+                            }`}
                         >
                             {showModal === "add-project" && (
                                 <AddProjectForm
@@ -371,13 +363,12 @@ export default function ProjectsPage() {
                             )}
 
                             {showModal === "view-project" && selectedProject && (
-                                <ProjectDetails
+                                <ProjectOverview
                                     project={selectedProject}
                                     onClose={() => {
                                         setShowModal(null);
                                         setSelectedProject(null);
                                     }}
-                                    onRefresh={fetchProjects}
                                 />
                             )}
                         </motion.div>
@@ -747,118 +738,17 @@ function EditProjectForm({
     );
 }
 
-// Project Details Component
-function ProjectDetails({
+// Project Overview Component (Simplified popup)
+function ProjectOverview({
     project,
     onClose,
-    onRefresh,
 }: {
     project: Project;
     onClose: () => void;
-    onRefresh: () => void;
 }) {
-    const [activeTab, setActiveTab] = React.useState<"tasks" | "milestones" | "documents" | "sheets">("tasks");
-    const [tasks, setTasks] = React.useState<Task[]>([]);
-    const [milestones, setMilestones] = React.useState<any[]>([]);
-    const [users, setUsers] = React.useState<any[]>([]);
-    const [loading, setLoading] = React.useState(false);
-    const [showTaskForm, setShowTaskForm] = React.useState(false);
-    const [showMilestoneForm, setShowMilestoneForm] = React.useState(false);
-    const [editingTask, setEditingTask] = React.useState<Task | null>(null);
-
-    // Fetch project details with tasks
-    const fetchDetails = async () => {
-        setLoading(true);
-        try {
-            const [projectRes, usersRes] = await Promise.all([
-                fetch(`/api/projects/${project.id}`),
-                fetch("/api/admin/team"),
-            ]);
-
-            if (projectRes.ok) {
-                const projectData = await projectRes.json();
-                setTasks(projectData.tasks || []);
-            }
-
-            if (usersRes.ok) {
-                const usersData = await usersRes.json();
-                setUsers(usersData);
-            }
-        } catch (error) {
-            console.error("Error fetching details:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    React.useEffect(() => {
-        fetchDetails();
-    }, [project.id]);
-
-    const handleCreateTask = async (taskData: any) => {
-        try {
-            const response = await fetch(`/api/projects/${project.id}/tasks`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(taskData),
-            });
-
-            if (response.ok) {
-                await fetchDetails();
-                onRefresh();
-                toast.success("Task created!");
-                setShowTaskForm(false);
-            } else {
-                toast.error("Failed to create task");
-            }
-        } catch (error) {
-            toast.error("Error creating task");
-        }
-    };
-
-    const handleUpdateTask = async (taskId: string, updates: any) => {
-        try {
-            const response = await fetch(`/api/projects/${project.id}/tasks/${taskId}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updates),
-            });
-
-            if (response.ok) {
-                await fetchDetails();
-                onRefresh();
-                toast.success("Task updated!");
-                setEditingTask(null);
-            } else {
-                toast.error("Failed to update task");
-            }
-        } catch (error) {
-            toast.error("Error updating task");
-        }
-    };
-
-    const handleDeleteTask = async (taskId: string) => {
-        if (!confirm("Delete this task?")) return;
-
-        try {
-            const response = await fetch(`/api/projects/${project.id}/tasks/${taskId}`, {
-                method: "DELETE",
-            });
-
-            if (response.ok) {
-                await fetchDetails();
-                onRefresh();
-                toast.success("Task deleted!");
-            } else {
-                toast.error("Failed to delete task");
-            }
-        } catch (error) {
-            toast.error("Error deleting task");
-        }
-    };
-
     return (
         <>
+            {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-xl">
@@ -866,9 +756,15 @@ function ProjectDetails({
                     </div>
                     <div>
                         <h2 className="text-lg font-semibold text-foreground">{project.name}</h2>
-                        <p className="text-sm text-muted-foreground line-clamp-1">
-                            {project.description}
-                        </p>
+                        <span
+                            className={`inline-block mt-1 px-2.5 py-1 rounded-lg text-xs font-medium ${
+                                project.status === "current"
+                                    ? "bg-orange-500/10 text-orange-500"
+                                    : "bg-green-500/10 text-green-500"
+                            }`}
+                        >
+                            {project.status === "current" ? "In Progress" : "Completed"}
+                        </span>
                     </div>
                 </div>
                 <button
@@ -879,445 +775,64 @@ function ProjectDetails({
                 </button>
             </div>
 
-            <div className="space-y-6">
-                {/* Project Info */}
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-secondary/50 rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Start Date</p>
-                        <p className="font-medium text-foreground">
-                            {new Date(project.start_date).toLocaleDateString()}
-                        </p>
-                    </div>
-                    <div className="bg-secondary/50 rounded-xl p-4">
-                        <p className="text-sm text-muted-foreground mb-1">End Date</p>
-                        <p className="font-medium text-foreground">
-                            {project.end_date
-                                ? new Date(project.end_date).toLocaleDateString()
-                                : "Not set"}
-                        </p>
-                    </div>
+            {/* Description */}
+            <p className="text-sm text-muted-foreground mb-6">{project.description}</p>
+
+            {/* Dates Grid */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="bg-secondary/50 rounded-xl p-4">
+                    <p className="text-sm text-muted-foreground mb-1">Start Date</p>
+                    <p className="font-medium text-foreground">
+                        {new Date(project.start_date).toLocaleDateString()}
+                    </p>
                 </div>
-
-                {/* Progress */}
-                <div>
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-foreground">Overall Progress</span>
-                        <span className="text-sm font-bold text-primary">
-                            {project.progress || 0}%
-                        </span>
-                    </div>
-                    <div className="h-3 bg-secondary rounded-full overflow-hidden">
-                        <div
-                            className="h-full bg-primary transition-all duration-500"
-                            style={{ width: `${project.progress || 0}%` }}
-                        />
-                    </div>
-                    {project.taskCount !== undefined && (
-                        <p className="text-sm text-muted-foreground mt-2">
-                            {project.completedTasks}/{project.taskCount} tasks completed
-                        </p>
-                    )}
+                <div className="bg-secondary/50 rounded-xl p-4">
+                    <p className="text-sm text-muted-foreground mb-1">End Date</p>
+                    <p className="font-medium text-foreground">
+                        {project.end_date
+                            ? new Date(project.end_date).toLocaleDateString()
+                            : "Not set"}
+                    </p>
                 </div>
+            </div>
 
-                {/* Tabs */}
-                <div className="border-t border-border pt-6">
-                    <div className="flex gap-2 mb-4">
-                        <button
-                            onClick={() => setActiveTab("tasks")}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "tasks"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                }`}
-                        >
-                            <ListTodo className="w-4 h-4 inline mr-2" />
-                            Tasks ({tasks.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("milestones")}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "milestones"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                }`}
-                        >
-                            <Target className="w-4 h-4 inline mr-2" />
-                            Milestones ({milestones.length})
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("documents")}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "documents"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                }`}
-                        >
-                            <FileText className="w-4 h-4 inline mr-2" />
-                            Documents
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("sheets")}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === "sheets"
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                                }`}
-                        >
-                            <FileSpreadsheet className="w-4 h-4 inline mr-2" />
-                            Sheets
-                        </button>
-                    </div>
-
-                    {/* Tasks Tab */}
-                    {activeTab === "tasks" && (
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <h3 className="font-semibold text-foreground">Project Tasks</h3>
-                                <button
-                                    onClick={() => setShowTaskForm(true)}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Add Task
-                                </button>
-                            </div>
-
-                            {showTaskForm && (
-                                <TaskForm
-                                    users={users}
-                                    onSubmit={handleCreateTask}
-                                    onCancel={() => setShowTaskForm(false)}
-                                />
-                            )}
-
-                            {loading ? (
-                                <div className="text-center py-8">
-                                    <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
-                                </div>
-                            ) : tasks.length > 0 ? (
-                                <div className="space-y-3">
-                                    {tasks.map((task) => (
-                                        <TaskItem
-                                            key={task.id}
-                                            task={task}
-                                            users={users}
-                                            onUpdate={(updates) => handleUpdateTask(task.id, updates)}
-                                            onDelete={() => handleDeleteTask(task.id)}
-                                        />
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    <ListTodo className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                    <p className="text-sm">No tasks yet. Add your first task!</p>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    {/* Milestones Tab */}
-                    {activeTab === "milestones" && (
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <h3 className="font-semibold text-foreground">Project Milestones</h3>
-                                <button
-                                    onClick={() => setShowMilestoneForm(true)}
-                                    className="flex items-center gap-2 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-                                >
-                                    <Plus className="w-4 h-4" />
-                                    Add Milestone
-                                </button>
-                            </div>
-
-                            <div className="text-center py-8 text-muted-foreground">
-                                <Target className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                                <p className="text-sm">Milestone tracking coming soon!</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Documents Tab */}
-                    {activeTab === "documents" && (
-                        <div className="space-y-4">
-                            <h3 className="font-semibold text-foreground">Project Documents</h3>
-                            <ProjectDocuments projectId={project.id} />
-                        </div>
-                    )}
-
-                    {/* Sheets Tab */}
-                    {activeTab === "sheets" && (
-                        <div className="space-y-4">
-                            <h3 className="font-semibold text-foreground">Google Sheets</h3>
-                            <ProjectSheets projectId={project.id} />
-                        </div>
-                    )}
+            {/* Progress Bar */}
+            <div className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-foreground">Overall Progress</span>
+                    <span className="text-sm font-bold text-primary">
+                        {project.progress || 0}%
+                    </span>
                 </div>
+                <div className="h-3 bg-secondary rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-primary transition-all duration-500"
+                        style={{ width: `${project.progress || 0}%` }}
+                    />
+                </div>
+                {project.taskCount !== undefined && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                        {project.completedTasks}/{project.taskCount} tasks completed
+                    </p>
+                )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t border-border">
+                <button
+                    onClick={onClose}
+                    className="flex-1 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-medium hover:bg-secondary/80 transition-colors"
+                >
+                    Close
+                </button>
+                <Link href={`/admin/projects/${project.id}`} className="flex-1">
+                    <button className="w-full py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 transition-colors flex items-center justify-center gap-2">
+                        <ExternalLink className="w-4 h-4" />
+                        View Project
+                    </button>
+                </Link>
             </div>
         </>
     );
 }
 
-// Task Form Component
-function TaskForm({
-    task,
-    users,
-    onSubmit,
-    onCancel,
-}: {
-    task?: Task;
-    users: any[];
-    onSubmit: (data: any) => Promise<void>;
-    onCancel: () => void;
-}) {
-    const [formData, setFormData] = React.useState({
-        title: task?.title || "",
-        description: task?.description || "",
-        status: task?.status || "todo",
-        priority: task?.priority || "medium",
-        assigned_to: task?.assigned_to || "",
-        due_date: task?.due_date || "",
-        progress: task?.progress || 0,
-    });
-    const [loading, setLoading] = React.useState(false);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            await onSubmit(formData);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <form onSubmit={handleSubmit} className="bg-secondary/30 rounded-xl p-4 space-y-3">
-            <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                    <input
-                        type="text"
-                        required
-                        placeholder="Task title"
-                        value={formData.title}
-                        onChange={(e) => setFormData((p) => ({ ...p, title: e.target.value }))}
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                </div>
-                <div className="col-span-2">
-                    <textarea
-                        placeholder="Description (optional)"
-                        rows={2}
-                        value={formData.description}
-                        onChange={(e) =>
-                            setFormData((p) => ({ ...p, description: e.target.value }))
-                        }
-                        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                    />
-                </div>
-                <select
-                    value={formData.status}
-                    onChange={(e) =>
-                        setFormData((p) => ({
-                            ...p,
-                            status: e.target.value as "todo" | "in_progress" | "completed",
-                        }))
-                    }
-                    className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                >
-                    <option value="todo">To Do</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                </select>
-                <select
-                    value={formData.priority}
-                    onChange={(e) =>
-                        setFormData((p) => ({
-                            ...p,
-                            priority: e.target.value as "low" | "medium" | "high",
-                        }))
-                    }
-                    className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                >
-                    <option value="low">Low Priority</option>
-                    <option value="medium">Medium Priority</option>
-                    <option value="high">High Priority</option>
-                </select>
-                <select
-                    value={formData.assigned_to}
-                    onChange={(e) => setFormData((p) => ({ ...p, assigned_to: e.target.value }))}
-                    className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                >
-                    <option value="">Unassigned</option>
-                    {users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                            {user.full_name}
-                        </option>
-                    ))}
-                </select>
-                <input
-                    type="date"
-                    value={formData.due_date}
-                    onChange={(e) => setFormData((p) => ({ ...p, due_date: e.target.value }))}
-                    className="px-3 py-2 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="Due date"
-                />
-                <div className="col-span-2">
-                    <label className="text-xs text-muted-foreground mb-1 block">
-                        Progress: {formData.progress}%
-                    </label>
-                    <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={formData.progress}
-                        onChange={(e) =>
-                            setFormData((p) => ({ ...p, progress: parseInt(e.target.value) }))
-                        }
-                        className="w-full"
-                    />
-                </div>
-            </div>
-            <div className="flex gap-2">
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="flex-1 py-2 bg-background border border-border rounded-lg text-sm font-medium hover:bg-secondary/50 transition-colors"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                >
-                    {loading ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : task ? "Update" : "Create"}
-                </button>
-            </div>
-        </form>
-    );
-}
-
-// Task Item Component
-function TaskItem({
-    task,
-    users,
-    onUpdate,
-    onDelete,
-}: {
-    task: Task;
-    users: any[];
-    onUpdate: (updates: any) => void;
-    onDelete: () => void;
-}) {
-    const [isEditing, setIsEditing] = React.useState(false);
-
-    const priorityColors = {
-        low: "text-blue-500 bg-blue-500/10",
-        medium: "text-orange-500 bg-orange-500/10",
-        high: "text-red-500 bg-red-500/10",
-    };
-
-    const statusIcons = {
-        todo: Square,
-        in_progress: Clock,
-        completed: CheckSquare,
-    };
-
-    const StatusIcon = statusIcons[task.status];
-
-    return (
-        <div className="bg-secondary/30 rounded-xl p-4 space-y-3">
-            <div className="flex items-start justify-between">
-                <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                        <StatusIcon className="w-4 h-4 text-muted-foreground" />
-                        <h4 className="font-medium text-foreground">{task.title}</h4>
-                        <span
-                            className={`px-2 py-0.5 rounded text-xs font-medium ${priorityColors[task.priority]
-                                }`}
-                        >
-                            {task.priority}
-                        </span>
-                    </div>
-                    {task.description && (
-                        <p className="text-sm text-muted-foreground">{task.description}</p>
-                    )}
-                </div>
-                <div className="flex gap-1">
-                    <button
-                        onClick={() => setIsEditing(!isEditing)}
-                        className="p-1.5 hover:bg-secondary rounded-lg transition-colors"
-                    >
-                        <Edit className="w-4 h-4 text-muted-foreground" />
-                    </button>
-                    <button
-                        onClick={onDelete}
-                        className="p-1.5 hover:bg-red-500/10 rounded-lg transition-colors"
-                    >
-                        <Trash2 className="w-4 h-4 text-red-500" />
-                    </button>
-                </div>
-            </div>
-
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                {task.assigned_user && (
-                    <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span>{task.assigned_user.full_name}</span>
-                    </div>
-                )}
-                {task.due_date && (
-                    <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>{new Date(task.due_date).toLocaleDateString()}</span>
-                    </div>
-                )}
-            </div>
-
-            <div>
-                <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{task.progress}%</span>
-                </div>
-                <div className="h-1.5 bg-background rounded-full overflow-hidden">
-                    <div
-                        className="h-full bg-primary transition-all"
-                        style={{ width: `${task.progress}%` }}
-                    />
-                </div>
-            </div>
-
-            {isEditing && (
-                <TaskForm
-                    task={task}
-                    users={users}
-                    onSubmit={async (data) => {
-                        await onUpdate(data);
-                        setIsEditing(false);
-                    }}
-                    onCancel={() => setIsEditing(false)}
-                />
-            )}
-
-            <div className="flex gap-2">
-                <button
-                    onClick={() => onUpdate({ status: "todo", progress: 0 })}
-                    disabled={task.status === "todo"}
-                    className="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors bg-background border border-border hover:bg-secondary/50 disabled:opacity-50"
-                >
-                    To Do
-                </button>
-                <button
-                    onClick={() => onUpdate({ status: "in_progress", progress: 50 })}
-                    disabled={task.status === "in_progress"}
-                    className="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors bg-background border border-border hover:bg-secondary/50 disabled:opacity-50"
-                >
-                    In Progress
-                </button>
-                <button
-                    onClick={() => onUpdate({ status: "completed", progress: 100 })}
-                    disabled={task.status === "completed"}
-                    className="flex-1 py-1.5 px-3 rounded-lg text-xs font-medium transition-colors bg-background border border-border hover:bg-secondary/50 disabled:opacity-50"
-                >
-                    Complete
-                </button>
-            </div>
-        </div>
-    );
-}

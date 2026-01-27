@@ -28,7 +28,7 @@ export default function AdminPanelClient({ profile }: AdminPanelClientProps) {
     const handleSignOut = async () => {
         await signOut();
         // Hard redirect to ensure cookies are cleared
-        window.location.href = "/auth-login";
+        window.location.href = "/auth/login";
     };
 
     return (
