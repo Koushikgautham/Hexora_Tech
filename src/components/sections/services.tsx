@@ -13,7 +13,7 @@ import { services } from "@/data/services";
 
 export function Services() {
   return (
-    <section id="services" className="py-24 sm:py-32 bg-black">
+    <section id="services" className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <FadeIn className="mx-auto max-w-2xl text-center">

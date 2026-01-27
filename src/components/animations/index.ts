@@ -12,5 +12,3 @@ export { SplashCursor } from "./splash-cursor";
 export { InfiniteScroll } from "./infinite-scroll";
 export { CardSwap, Card } from "./card-swap";
 export { ClickSpark } from "./click-spark";
-export { PillNav } from "./pill-nav";
-export type { PillNavItem, PillNavProps } from "./pill-nav";

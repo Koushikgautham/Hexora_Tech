@@ -7,6 +7,7 @@ import {
   Team,
   Testimonials,
   Contact,
+  GlobeExperiment,
 } from "@/components/sections";
 
 export default function Home() {
@@ -32,6 +33,9 @@ export default function Home() {
       
       {/* Testimonials - Social proof */}
       <Testimonials />
+      
+      {/* Globe Experiment - 3D Interactive Globe */}
+      <GlobeExperiment />
       
       {/* Contact - Get in touch */}
       <Contact />

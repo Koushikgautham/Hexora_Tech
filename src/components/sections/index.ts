@@ -9,3 +9,4 @@ export { CTA } from "./cta";
 export { Team } from "./team";
 export { Projects } from "./projects";
 export { Contact } from "./contact";
+export { GlobeExperiment } from "./globe-experiment";

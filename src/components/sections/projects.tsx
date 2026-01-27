@@ -171,18 +171,6 @@ export function Projects() {
                           </div>
                         ))}
                       </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {project.tags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
                     </div>
                   </Card>
                 ))}
