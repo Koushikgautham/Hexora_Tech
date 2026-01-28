@@ -1,212 +1,213 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ExternalLink, ArrowRight, ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { FadeIn, CardSwap, Card } from "@/components/animations";
-import "@/components/animations/card-swap.css";
+import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ArrowUpRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Placeholder projects - will be replaced with real data
 const placeholderProjects = [
   {
     id: 1,
-    title: "Project Coming Soon",
-    client: "Client Name",
-    category: "Digital Transformation",
-    description: "An exciting case study showcasing our digital transformation expertise for a leading MSME.",
-    results: [
-      { metric: "200%", label: "Growth" },
-      { metric: "50%", label: "Cost Saved" },
-    ],
-    tags: ["Automation", "Cloud", "Analytics"],
+    title: "Coming Soon",
+    client: "Enterprise Client",
+    category: "Branding",
+    year: "2025",
+    description: "Digital transformation and brand identity redesign for a leading enterprise.",
+    tags: ["Branding", "Design", "Strategy"],
+    image: null, // Placeholder for future images
   },
   {
     id: 2,
-    title: "Project Coming Soon",
-    client: "Ecommerce Brand",
-    category: "Ecommerce Solutions",
-    description: "Complete ecommerce platform development and scaling for rapid business growth.",
-    results: [
-      { metric: "3x", label: "Revenue" },
-      { metric: "40%", label: "Conversion" },
-    ],
-    tags: ["Shopify", "Payments", "Inventory"],
+    title: "Coming Soon",
+    client: "E-Commerce Brand",
+    category: "Development",
+    year: "2024",
+    description: "Full-stack e-commerce platform with custom inventory management.",
+    tags: ["Development", "E-Commerce"],
+    image: null,
   },
   {
     id: 3,
-    title: "Project Coming Soon",
-    client: "Social Brand",
-    category: "Social Media Management",
-    description: "Strategic social media campaigns that drove exceptional engagement and growth.",
-    results: [
-      { metric: "500%", label: "Reach" },
-      { metric: "10x", label: "Engagement" },
-    ],
-    tags: ["Content", "Ads", "Analytics"],
+    title: "Coming Soon",
+    client: "Tech Startup",
+    category: "Design",
+    year: "2024",
+    description: "UI/UX design system and web application development.",
+    tags: ["Design", "Development"],
+    image: null,
   },
 ];
 
 export function Projects() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Animate header
+      gsap.from(".projects-header", {
+        scrollTrigger: {
+          trigger: ".projects-header",
+          start: "top 80%",
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        ease: "power3.out",
+      });
+
+      // Animate stat block
+      gsap.from(".projects-stat", {
+        scrollTrigger: {
+          trigger: ".projects-stat",
+          start: "top 80%",
+        },
+        opacity: 0,
+        y: 30,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power3.out",
+      });
+
+      // Remove the problematic project card animation
+      // Cards will be visible by default to prevent loading issues
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="projects" className="py-24 sm:py-32 overflow-hidden">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-          {/* Left Column - Text Content */}
-          <div>
-            <FadeIn>
-              <span className="mb-4 inline-block text-sm font-semibold uppercase tracking-wider text-primary">
-                Our Work
+    <section
+      ref={sectionRef}
+      id="projects"
+      className="relative bg-[#0a0a0a] py-24 lg:py-32"
+    >
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        {/* Header */}
+        <div className="projects-header mb-16 lg:mb-20">
+          <div className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
+            <div>
+              <span className="mb-4 block font-mono text-xs text-gray-500">
+                // our work
               </span>
-              <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
-                Success Stories
+              <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                Projects.
               </h2>
-              <p className="mb-8 text-lg text-muted-foreground">
-                Real results for real businesses. See how we&apos;ve helped MSMEs
-                transform and grow with our digital solutions.
-              </p>
-            </FadeIn>
-
-            <FadeIn delay={0.2}>
-              <div className="space-y-6">
-                {placeholderProjects.slice(0, 3).map((project, index) => (
-                  <div
-                    key={project.id}
-                    className="group flex items-start gap-4 rounded-lg border border-transparent p-4 transition-all hover:border-border hover:bg-secondary/50 cursor-pointer"
-                  >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-                      {index + 1}
-                    </span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold group-hover:text-primary transition-colors">
-                          {project.title}
-                        </h3>
-                        <ArrowUpRight className="h-4 w-4 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                      </div>
-                      <p className="mt-1 text-sm text-muted-foreground line-clamp-1">
-                        {project.description}
-                      </p>
-                      <div className="mt-2 flex gap-3">
-                        {project.results.slice(0, 2).map((result, i) => (
-                          <span key={i} className="text-xs">
-                            <span className="font-semibold text-primary">
-                              {result.metric}
-                            </span>{" "}
-                            <span className="text-muted-foreground">
-                              {result.label}
-                            </span>
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </FadeIn>
-
-            <FadeIn delay={0.4} className="mt-8">
-              <p className="mb-4 text-muted-foreground text-sm">
-                More case studies coming soon. Want to be our next success story?
-              </p>
-              <Button
-                className="rounded-full"
-                onClick={() => {
-                  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                Start Your Project
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </FadeIn>
-          </div>
-
-          {/* Right Column - Card Swap Animation */}
-          <FadeIn delay={0.3} className="relative hidden lg:block">
-            <div className="relative h-[500px] flex items-center justify-center">
-              <CardSwap
-                width={400}
-                height={320}
-                cardDistance={50}
-                verticalDistance={60}
-                delay={4000}
-                pauseOnHover={true}
-                skewAmount={4}
-                easing="elastic"
-              >
-                {placeholderProjects.map((project) => (
-                  <Card key={project.id} className="group bg-background">
-                    {/* Card Image Area - Gradient placeholder */}
-                    <div className="relative h-40 overflow-hidden bg-secondary">
-                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-muted">
-                        <span className="text-6xl font-bold text-primary/30">
-                          {project.client.charAt(0)}
-                        </span>
-                      </div>
-                      {/* Category Badge */}
-                      <Badge className="absolute top-3 left-3" variant="secondary">
-                        {project.category}
-                      </Badge>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="p-5 bg-background">
-                      <h3 className="mb-1 text-base font-semibold line-clamp-1 text-foreground">
-                        {project.title}
-                      </h3>
-                      <p className="mb-3 text-xs text-muted-foreground line-clamp-2">
-                        {project.description}
-                      </p>
-
-                      {/* Results */}
-                      <div className="flex gap-4 mb-3">
-                        {project.results.map((result, i) => (
-                          <div key={i} className="text-center">
-                            <span className="block text-lg font-bold text-primary">
-                              {result.metric}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground uppercase">
-                              {result.label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </CardSwap>
             </div>
-          </FadeIn>
+            <div className="max-w-md">
+              <p className="text-sm leading-relaxed text-gray-400">
+                Real creativity. Tangible results. Discover our innovative digital
+                experiences across multiple industries.
+              </p>
+            </div>
+          </div>
+        </div>
 
-          {/* Mobile Cards - Shown on smaller screens */}
-          <div className="lg:hidden">
-            <FadeIn delay={0.3}>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {placeholderProjects.slice(0, 2).map((project) => (
-                  <div
-                    key={project.id}
-                    className="rounded-xl border border-border bg-card p-4"
-                  >
-                    <Badge className="mb-3" variant="secondary">
-                      {project.category}
-                    </Badge>
-                    <h3 className="font-semibold mb-1">{project.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+        {/* Projects Grid */}
+        <div className="projects-grid grid gap-4 md:grid-cols-2 lg:gap-6">
+          {placeholderProjects.map((project, index) => (
+            <div
+              key={project.id}
+              className={cn(
+                "project-card group relative overflow-hidden rounded-2xl border border-white/5 bg-[#111] transition-all hover:border-white/10",
+                index === 0 && "md:col-span-2 md:row-span-2"
+              )}
+            >
+              {/* Project Image/Placeholder */}
+              <div
+                className={cn(
+                  "relative overflow-hidden bg-gradient-to-br from-primary/10 via-[#111] to-[#111]",
+                  index === 0 ? "h-80 lg:h-96" : "h-64"
+                )}
+              >
+                {/* Placeholder gradient */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-8xl font-bold text-white/5">
+                    {project.client.charAt(0)}
+                  </span>
+                </div>
+
+                {/* Year Badge */}
+                <div className="absolute right-4 top-4">
+                  <span className="rounded-full border border-white/10 bg-[#111]/80 px-3 py-1 font-mono text-xs text-gray-400 backdrop-blur-sm">
+                    /{project.year}
+                  </span>
+                </div>
+
+                {/* Category Badge */}
+                <div className="absolute left-4 top-4">
+                  <span className="rounded-full border border-white/10 bg-[#111]/80 px-3 py-1 text-xs text-gray-400 backdrop-blur-sm">
+                    {project.category}
+                  </span>
+                </div>
+
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111] via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+              </div>
+
+              {/* Project Info */}
+              <div className="p-6 lg:p-8">
+                <div className="mb-4 flex items-start justify-between">
+                  <div>
+                    <span className="mb-2 block font-mono text-xs text-gray-600">
+                      // {project.client.toLowerCase().replace(/ /g, "_")}
+                    </span>
+                    <h3 className="mb-2 text-xl font-semibold tracking-tight text-white transition-colors group-hover:text-primary lg:text-2xl">
+                      {project.title}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-gray-400">
                       {project.description}
                     </p>
-                    <div className="flex gap-4">
-                      {project.results.map((result, i) => (
-                        <div key={i}>
-                          <span className="font-bold text-primary">{result.metric}</span>
-                          <span className="text-xs text-muted-foreground ml-1">{result.label}</span>
-                        </div>
-                      ))}
+                  </div>
+                  <div className="flex-shrink-0">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-gray-400 transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-white">
+                      <ArrowUpRight className="h-5 w-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-500 transition-colors group-hover:border-white/20 group-hover:text-gray-400"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </FadeIn>
+            </div>
+          ))}
+        </div>
+
+        {/* Stats/CTA Block */}
+        <div className="projects-stat mt-12 flex flex-col items-center justify-between gap-4 rounded-2xl border border-white/5 bg-gradient-to-br from-primary/5 to-transparent p-6 lg:mt-16 lg:flex-row lg:p-8">
+          <div>
+            <span className="mb-2 block font-mono text-xs text-gray-600">
+              // track record
+            </span>
+            <div className="mb-1 flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-white lg:text-5xl">
+                150<span className="text-primary">+</span>
+              </span>
+            </div>
+            <p className="text-sm text-gray-400">
+              projects delivered with excellence across{" "}
+              <span className="text-white">multiple industries.</span>
+            </p>
           </div>
+          <a
+            href="#contact"
+            className="group flex items-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-primary/90"
+          >
+            View all
+            <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </a>
         </div>
       </div>
     </section>

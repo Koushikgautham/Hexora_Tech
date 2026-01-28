@@ -15,7 +15,7 @@ const processSteps = [
     icon: Lightbulb,
     title: "Strategy",
     description:
-      "Our team develops a customized digital strategy tailored to your specific needs and budget.",
+      "Our team develops a customized digital strategy tailored to your specific needs.",
   },
   {
     icon: Rocket,

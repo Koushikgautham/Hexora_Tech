@@ -12,3 +12,5 @@ export { SplashCursor } from "./splash-cursor";
 export { InfiniteScroll } from "./infinite-scroll";
 export { CardSwap, Card } from "./card-swap";
 export { ClickSpark } from "./click-spark";
+export { ThreadsBackground } from "./threads-background";
+export { StarField } from "./star-field";

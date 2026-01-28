@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import * as topojson from 'topojson-client';
 
@@ -11,6 +11,7 @@ interface GlobeProps {
   markerLng?: number;
   autoRotate?: boolean;
   className?: string;
+  embedded?: boolean; // When true, renders just the globe without wrapper/header
 }
 
 export default function Globe({
@@ -20,7 +21,10 @@ export default function Globe({
   markerLng = 80.27,
   autoRotate: initialAutoRotate = true,
   className = '',
+  embedded = false,
 }: GlobeProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<{
     scene: THREE.Scene;
@@ -204,14 +208,23 @@ export default function Globe({
       });
     };
 
-    // Load and render countries from TopoJSON
-    const loadCountries = async () => {
+    // Load and render countries from TopoJSON with retry logic
+    const loadCountries = async (retryCount = 0): Promise<void> => {
+      const maxRetries = 3;
+      const retryDelay = 1000 * (retryCount + 1); // Exponential backoff
+
       try {
+        setIsLoading(true);
+
         // Load both countries (for borders) and land (for dot placement including Antarctica)
         const [countriesResponse, landResponse] = await Promise.all([
           fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'),
           fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/land-110m.json')
         ]);
+
+        if (!countriesResponse.ok || !landResponse.ok) {
+          throw new Error('Failed to fetch TopoJSON data');
+        }
 
         const countryTopology = await countriesResponse.json();
         const landTopology = await landResponse.json();
@@ -251,6 +264,7 @@ export default function Globe({
         const landGeometry = (land as GeoJSON.Feature)?.geometry as GeoJSON.Polygon | GeoJSON.MultiPolygon | null;
         if (!landGeometry) {
           createLandDots();
+          setIsLoading(false);
           return;
         }
         if (landGeometry.type === 'Polygon') {
@@ -270,8 +284,24 @@ export default function Globe({
 
         // After loading land data, create dots on land
         createLandDots();
+        setIsLoading(false);
+        setLoadError(false);
       } catch (error) {
-        console.error('Error loading countries:', error);
+        console.error(`Error loading countries (attempt ${retryCount + 1}/${maxRetries}):`, error);
+
+        if (retryCount < maxRetries - 1) {
+          // Retry with delay
+          setTimeout(() => {
+            loadCountries(retryCount + 1);
+          }, retryDelay);
+        } else {
+          // Final failure - render basic globe with dots
+          console.error('Failed to load country data after retries, rendering basic globe');
+          setLoadError(true);
+          setIsLoading(false);
+          // Create dots anyway for basic globe appearance
+          createLandDots();
+        }
       }
     };
 
@@ -453,6 +483,24 @@ export default function Globe({
     };
   }, [markerLat, markerLng, initialAutoRotate]);
 
+  // Embedded mode: just render the globe canvas container
+  if (embedded) {
+    return (
+      <div className={`w-full h-full relative ${className}`}>
+        <div
+          ref={containerRef}
+          className="w-full h-full cursor-grab active:cursor-grabbing"
+        />
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-radial from-primary/10 pointer-events-none">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/20 border-t-primary" />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Full mode with header and overlays
   return (
     <div className={`relative flex flex-col items-center justify-center min-h-screen bg-black overflow-hidden ${className}`}>
       {/* Vignette overlay */}
