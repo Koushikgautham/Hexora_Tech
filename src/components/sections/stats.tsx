@@ -93,7 +93,7 @@ export function Stats() {
               // experience
             </span>
             <div
-              ref={(el) => (statsRefs.current[0] = el)}
+              ref={(el) => { statsRefs.current[0] = el; }}
               data-value="5"
               data-suffix="+"
               className="mb-2 text-5xl font-bold text-white lg:text-6xl"
@@ -112,7 +112,7 @@ export function Stats() {
               // delivered
             </span>
             <div
-              ref={(el) => (statsRefs.current[1] = el)}
+              ref={(el) => { statsRefs.current[1] = el; }}
               data-value="150"
               data-suffix="+"
               className="mb-2 text-4xl font-bold text-primary"
@@ -128,7 +128,7 @@ export function Stats() {
               // satisfaction
             </span>
             <div
-              ref={(el) => (statsRefs.current[2] = el)}
+              ref={(el) => { statsRefs.current[2] = el; }}
               data-value="98"
               data-suffix="%"
               className="mb-2 text-4xl font-bold text-primary"
@@ -165,7 +165,7 @@ export function Stats() {
               // clients
             </span>
             <div
-              ref={(el) => (statsRefs.current[3] = el)}
+              ref={(el) => { statsRefs.current[3] = el; }}
               data-value="50"
               data-suffix="+"
               className="mb-2 text-4xl font-bold text-white"
