@@ -11,8 +11,12 @@ import {
     X,
     Maximize2,
     Link,
+    Lock,
+    LockOpen,
+    Clock,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Sheet {
     id: string;
@@ -20,10 +24,17 @@ interface Sheet {
     sheet_url: string;
     description: string | null;
     created_at: string;
+    added_by: string;
     added_by_user?: {
         id: string;
         full_name: string;
     };
+}
+
+interface AccessRequest {
+    id: string;
+    status: "pending" | "accepted" | "rejected";
+    created_at: string;
 }
 
 interface ProjectSheetsProps {
@@ -31,11 +42,14 @@ interface ProjectSheetsProps {
 }
 
 export function ProjectSheets({ projectId }: ProjectSheetsProps) {
+    const { profile } = useAuth();
     const [sheets, setSheets] = React.useState<Sheet[]>([]);
     const [isLoading, setIsLoading] = React.useState(true);
     const [showAddForm, setShowAddForm] = React.useState(false);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [previewSheet, setPreviewSheet] = React.useState<Sheet | null>(null);
+    const [sheetAccessStatus, setSheetAccessStatus] = React.useState<{ [key: string]: AccessRequest | null }>({});
+    const [requestingAccessSheetId, setRequestingAccessSheetId] = React.useState<string | null>(null);
     const [formData, setFormData] = React.useState({
         name: "",
         sheet_url: "",
@@ -49,6 +63,10 @@ export function ProjectSheets({ projectId }: ProjectSheetsProps) {
             if (response.ok) {
                 const data = await response.json();
                 setSheets(data);
+                // Fetch access status for each sheet
+                data.forEach((sheet: Sheet) => {
+                    fetchAccessStatus(sheet.id);
+                });
             }
         } catch (error) {
             console.error("Error fetching sheets:", error);
@@ -56,6 +74,22 @@ export function ProjectSheets({ projectId }: ProjectSheetsProps) {
             setIsLoading(false);
         }
     }, [projectId]);
+
+    // Fetch access status for a sheet
+    const fetchAccessStatus = async (sheetId: string) => {
+        try {
+            const response = await fetch(`/api/projects/${projectId}/sheets/${sheetId}/access-request`);
+            if (response.ok) {
+                const data = await response.json();
+                setSheetAccessStatus((prev) => ({
+                    ...prev,
+                    [sheetId]: data.request,
+                }));
+            }
+        } catch (error) {
+            console.error("Error fetching access status:", error);
+        }
+    };
 
     React.useEffect(() => {
         fetchSheets();
@@ -99,6 +133,31 @@ export function ProjectSheets({ projectId }: ProjectSheetsProps) {
             console.error(error);
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    // Handle request edit access
+    const handleRequestAccess = async (sheetId: string) => {
+        setRequestingAccessSheetId(sheetId);
+        try {
+            const response = await fetch(`/api/projects/${projectId}/sheets/${sheetId}/access-request`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                toast.success("Access request sent to sheet creator");
+                await fetchAccessStatus(sheetId);
+            } else {
+                const error = await response.json();
+                toast.error(error.error || "Failed to send request");
+            }
+        } catch (error) {
+            toast.error("Error requesting access");
+            console.error(error);
+        } finally {
+            setRequestingAccessSheetId(null);
         }
     };
 
@@ -270,8 +329,45 @@ export function ProjectSheets({ projectId }: ProjectSheetsProps) {
                                                 {sheet.description}
                                             </p>
                                         )}
+                                        {/* Show access status if not creator */}
+                                        {sheet.added_by !== profile?.id && (
+                                            <div className="mt-1">
+                                                {sheetAccessStatus[sheet.id]?.status === "pending" ? (
+                                                    <div className="flex items-center gap-1 text-xs text-orange-500">
+                                                        <Clock className="w-3 h-3" />
+                                                        Request pending
+                                                    </div>
+                                                ) : sheetAccessStatus[sheet.id]?.status === "accepted" ? (
+                                                    <div className="flex items-center gap-1 text-xs text-green-500">
+                                                        <LockOpen className="w-3 h-3" />
+                                                        Edit access granted
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                        <Lock className="w-3 h-3" />
+                                                        View only
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex items-center gap-1">
+                                        {/* Request Edit Access Button */}
+                                        {sheet.added_by !== profile?.id && !sheetAccessStatus[sheet.id] && (
+                                            <button
+                                                onClick={() => handleRequestAccess(sheet.id)}
+                                                disabled={requestingAccessSheetId === sheet.id}
+                                                className="px-2 py-1.5 text-xs bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-1"
+                                                title="Request edit access"
+                                            >
+                                                {requestingAccessSheetId === sheet.id ? (
+                                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                                ) : (
+                                                    <Lock className="w-3 h-3" />
+                                                )}
+                                                Request Access
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => setPreviewSheet(sheet)}
                                             className="p-2 hover:bg-secondary rounded-lg transition-colors"

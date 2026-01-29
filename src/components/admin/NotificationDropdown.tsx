@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Check, CheckCheck, Clock, ExternalLink, X } from "lucide-react";
+import { Bell, Check, CheckCheck, Clock, ExternalLink, X, Lock, FileSpreadsheet } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Notification {
     id: string;
-    type: "task_assigned" | "task_updated" | "project_created";
+    type: "task_assigned" | "task_updated" | "project_created" | "sheet_access_request" | "sheet_access_response";
     title: string;
     message: string | null;
     task_id: string | null;
@@ -228,14 +228,31 @@ export function NotificationDropdown({ isScrumMaster }: NotificationDropdownProp
                                                     : "bg-primary/10"
                                                 }`}
                                         >
-                                            {notification.type === "task_assigned" ? (
+                                            {notification.type === "task_assigned" && (
                                                 <Check
                                                     className={`w-4 h-4 ${notification.is_read
                                                             ? "text-muted-foreground"
                                                             : "text-primary"
                                                         }`}
                                                 />
-                                            ) : (
+                                            )}
+                                            {notification.type === "sheet_access_request" && (
+                                                <Lock
+                                                    className={`w-4 h-4 ${notification.is_read
+                                                            ? "text-muted-foreground"
+                                                            : "text-blue-500"
+                                                        }`}
+                                                />
+                                            )}
+                                            {notification.type === "sheet_access_response" && (
+                                                <FileSpreadsheet
+                                                    className={`w-4 h-4 ${notification.is_read
+                                                            ? "text-muted-foreground"
+                                                            : "text-green-500"
+                                                        }`}
+                                                />
+                                            )}
+                                            {!["task_assigned", "sheet_access_request", "sheet_access_response"].includes(notification.type) && (
                                                 <Bell
                                                     className={`w-4 h-4 ${notification.is_read
                                                             ? "text-muted-foreground"

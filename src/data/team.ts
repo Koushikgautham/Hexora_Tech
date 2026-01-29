@@ -48,7 +48,7 @@ export const team = [
     id: 6,
     name: "Jyoti Prakash Behera",
     role: "Co-Founder",
-    bio: "Creative strategist with a passion for brand building and social media excellence. Drives client engagement and digital marketing initiatives.",
+    bio: "A DevOps and application development–focused engineer delivering scalable, automated, and high-performance systems. Experienced in building, deploying, and optimizing reliable applications with a strong emphasis on efficiency, stability, and production readiness.",
     avatar: "/images/jyoti.jpeg",
     linkedin: "#",
     twitter: "#",
