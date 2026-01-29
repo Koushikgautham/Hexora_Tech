@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const handleSmoothScroll = (
 };
 
 export function Header() {
+  const pathname = usePathname();
   const [isCompact, setIsCompact] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState("hero");
@@ -44,6 +46,12 @@ export function Header() {
   const scrollUpStartY = React.useRef(0);
 
   React.useEffect(() => {
+    // If on services page, set active section to services
+    if (pathname === "/services") {
+      setActiveSection("services");
+      return;
+    }
+
     const sectionIds = ["hero", ...navItems.map((item) => item.href.replace("#", ""))];
     const observers: IntersectionObserver[] = [];
 
@@ -69,7 +77,7 @@ export function Header() {
     return () => {
       observers.forEach((observer) => observer.disconnect());
     };
-  }, []);
+  }, [pathname]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -117,20 +125,20 @@ export function Header() {
       className="fixed left-0 right-0 top-0 z-50 flex justify-center px-4 pt-4"
     >
       {/* Outer container for positioning */}
-      <div className="relative w-full max-w-7xl flex justify-center">
+      <div className="relative w-full max-w-6xl flex justify-center">
         {/* The navbar pill */}
         <div
           className={cn(
-            "rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-700 ease-in-out",
+            "rounded-2xl border border-white/10 backdrop-blur-xl transition-all duration-700 ease-in-out flex items-center justify-center",
             isCompact
-              ? "bg-[#111]/90 w-auto"
-              : "bg-[#0a0a0a]/80 w-full"
+              ? "bg-[#111]/90 w-auto px-6"
+              : "bg-[#0a0a0a]/80 w-full max-w-5xl"
           )}
           style={{
             transformOrigin: "center"
           }}
         >
-          <div className="flex h-16 items-center px-6 gap-6">
+          <div className="flex h-16 items-center gap-8 w-full px-6">
             {/* Logo - left side */}
             <div
               className={cn(
@@ -156,20 +164,25 @@ export function Header() {
             <nav className="hidden items-center gap-2 md:flex flex-shrink-0">
               {navItems.map((item) => {
                 const isActive = activeSection === item.href.replace("#", "");
+                const isServicesLink = item.href === "#services" && pathname === "/services";
                 return (
-                  <a
+                  <Link
                     key={item.href}
-                    href={item.href}
-                    onClick={(e) => handleSmoothScroll(e, item.href)}
+                    href={isServicesLink ? "/services" : item.href}
+                    onClick={(e) => {
+                      if (!isServicesLink) {
+                        handleSmoothScroll(e as React.MouseEvent<HTMLAnchorElement>, item.href);
+                      }
+                    }}
                     className={cn(
                       "rounded-lg px-4 py-2 text-sm font-medium transition-all whitespace-nowrap",
-                      isActive
+                      isActive || isServicesLink
                         ? "bg-white/10 text-white"
                         : "text-gray-400 hover:text-white"
                     )}
                   >
                     {item.label}
-                  </a>
+                  </Link>
                 );
               })}
             </nav>
@@ -183,7 +196,7 @@ export function Header() {
             {/* Right side - buttons */}
             <div
               className={cn(
-                "hidden items-center gap-4 md:flex flex-shrink-0 transition-all duration-700 ease-in-out",
+                "hidden items-center gap-6 md:flex flex-shrink-0 transition-all duration-700 ease-in-out pr-2",
                 isCompact ? "opacity-0 scale-95 max-w-0 overflow-hidden" : "opacity-100 scale-100 max-w-xs"
               )}
             >
@@ -192,13 +205,6 @@ export function Header() {
                 className="text-sm font-medium text-gray-400 transition-colors hover:text-white whitespace-nowrap"
               >
                 Login
-              </Link>
-              <Link
-                href="#contact"
-                onClick={(e) => handleSmoothScroll(e, "#contact")}
-                className="rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-primary/90 whitespace-nowrap"
-              >
-                Start a Project
               </Link>
             </div>
 
@@ -279,16 +285,6 @@ export function Header() {
                 >
                   Login
                 </Link>
-                <a
-                  href="#contact"
-                  onClick={(e) => {
-                    handleSmoothScroll(e, "#contact");
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="block w-full rounded-lg bg-primary py-3 text-center text-sm font-medium text-white"
-                >
-                  Start a Project
-                </a>
               </motion.div>
             </SheetContent>
           </Sheet>
