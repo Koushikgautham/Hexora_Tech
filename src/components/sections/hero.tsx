@@ -2,9 +2,18 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { gsap } from "gsap";
 import { ArrowUpRight } from "lucide-react";
-import { ThreadsBackground } from "@/components/animations/threads-background";
+
+// Dynamically import ThreadsBackground (WebGL component)
+const ThreadsBackground = dynamic(
+  () => import("@/components/animations/threads-background").then(mod => mod.ThreadsBackground),
+  {
+    ssr: false,
+    loading: () => <div className="absolute inset-0" />,
+  }
+);
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -88,6 +97,7 @@ export function Hero() {
             <Link
               href="/portfolio"
               className="group inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-primary/90"
+              prefetch={false}
             >
               View Our Work
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -95,6 +105,7 @@ export function Hero() {
             <Link
               href="/contact"
               className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-white/10"
+              prefetch={false}
             >
               Start a Project
             </Link>

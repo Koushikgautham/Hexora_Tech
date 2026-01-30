@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import * as THREE from 'three';
 import * as topojson from 'topojson-client';
 
@@ -57,9 +57,15 @@ export default function Globe({
     camera.position.z = 2.8;
     camera.position.y = 0.3;
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+      powerPreference: "high-performance",
+      stencil: false,
+      depth: false,
+    });
     renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Reduce pixel ratio for performance
     container.appendChild(renderer.domElement);
 
     // Globe group for rotation
@@ -67,7 +73,8 @@ export default function Globe({
     scene.add(globeGroup);
 
     // Create globe sphere (dark background matching Hexor theme)
-    const globeGeometry = new THREE.SphereGeometry(1, 64, 64);
+    // Reduced geometry complexity for performance
+    const globeGeometry = new THREE.SphereGeometry(1, 48, 48);
     const globeMaterial = new THREE.MeshBasicMaterial({
       color: 0x0a0a0a, // Near black matching dark theme
     });
@@ -354,15 +361,15 @@ export default function Globe({
       animationId: 0,
     };
 
-    // Mouse handlers
-    const handleMouseDown = (e: MouseEvent) => {
+    // Memoized mouse handlers for performance
+    const handleMouseDown = useCallback((e: MouseEvent) => {
       if (!sceneRef.current) return;
       sceneRef.current.isDragging = true;
       sceneRef.current.autoRotate = false;
       sceneRef.current.previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
+    }, []);
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handleMouseMove = useCallback((e: MouseEvent) => {
       if (!sceneRef.current || !sceneRef.current.isDragging) return;
 
       const deltaX = e.clientX - sceneRef.current.previousMousePosition.x;
@@ -376,18 +383,18 @@ export default function Globe({
       );
 
       sceneRef.current.previousMousePosition = { x: e.clientX, y: e.clientY };
-    };
+    }, []);
 
-    const handleMouseUp = () => {
+    const handleMouseUp = useCallback(() => {
       if (!sceneRef.current) return;
       sceneRef.current.isDragging = false;
       setTimeout(() => {
         if (sceneRef.current) sceneRef.current.autoRotate = true;
       }, 3000);
-    };
+    }, []);
 
-    // Touch handlers
-    const handleTouchStart = (e: TouchEvent) => {
+    // Memoized touch handlers for performance
+    const handleTouchStart = useCallback((e: TouchEvent) => {
       if (!sceneRef.current) return;
       sceneRef.current.isDragging = true;
       sceneRef.current.autoRotate = false;
@@ -395,9 +402,9 @@ export default function Globe({
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
       };
-    };
+    }, []);
 
-    const handleTouchMove = (e: TouchEvent) => {
+    const handleTouchMove = useCallback((e: TouchEvent) => {
       if (!sceneRef.current || !sceneRef.current.isDragging) return;
 
       const deltaX = e.touches[0].clientX - sceneRef.current.previousMousePosition.x;
@@ -414,15 +421,15 @@ export default function Globe({
         x: e.touches[0].clientX,
         y: e.touches[0].clientY,
       };
-    };
+    }, []);
 
-    const handleTouchEnd = () => {
+    const handleTouchEnd = useCallback(() => {
       if (!sceneRef.current) return;
       sceneRef.current.isDragging = false;
       setTimeout(() => {
         if (sceneRef.current) sceneRef.current.autoRotate = true;
       }, 3000);
-    };
+    }, []);
 
     // Resize handler
     const handleResize = () => {
