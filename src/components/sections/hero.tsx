@@ -108,7 +108,7 @@ export function Hero() {
               // what we do
             </span>
             <Link
-              href="/services"
+              href="#services"
               className="text-sm text-gray-400 transition-colors hover:text-white"
             >
               All services →

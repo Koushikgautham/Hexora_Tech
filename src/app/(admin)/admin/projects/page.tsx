@@ -16,7 +16,7 @@ import {
     ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../../../../contexts/AuthContext";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 

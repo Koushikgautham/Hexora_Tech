@@ -1,16 +1,10 @@
-export { SplitText } from "./split-text";
-export { BlurText } from "./blur-text";
-export { CountUp } from "./count-up";
 export { FadeIn } from "./fade-in";
 export { StaggerChildren, staggerItemVariants } from "./stagger-children";
 export { SpotlightCard } from "./spotlight-card";
 export { TiltedCard } from "./tilted-card";
-export { AuroraBackground } from "./aurora-background";
 export { Particles } from "./particles";
 export { MagneticButton } from "./magnetic-button";
 export { SplashCursor } from "./splash-cursor";
-export { InfiniteScroll } from "./infinite-scroll";
 export { CardSwap, Card } from "./card-swap";
 export { ClickSpark } from "./click-spark";
 export { ThreadsBackground } from "./threads-background";
-export { StarField } from "./star-field";

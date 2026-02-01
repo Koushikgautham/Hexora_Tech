@@ -22,7 +22,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
 import { useTheme } from "next-themes";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../../../../contexts/AuthContext";
 
 const profileSchema = z.object({
     fullName: z.string().min(2, "Full name must be at least 2 characters"),

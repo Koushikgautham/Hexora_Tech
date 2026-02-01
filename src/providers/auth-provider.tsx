@@ -4,7 +4,7 @@ import * as React from "react";
 
 // Lazy import AuthProvider for code splitting
 const LazyAuthProvider = React.lazy(() =>
-    import("@/contexts/AuthContext").then((mod) => ({
+    import("../contexts/AuthContext").then((mod) => ({
         default: mod.AuthProvider,
     }))
 );

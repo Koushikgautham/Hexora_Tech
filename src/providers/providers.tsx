@@ -1,7 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "@/providers/theme-provider";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider } from "../contexts/AuthContext";
 import { SplashCursor } from "@/components/animations/splash-cursor";
 import { ClickSpark } from "@/components/animations/click-spark";
 import { Toaster } from "sonner";

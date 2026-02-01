@@ -38,8 +38,7 @@ export function ServicesOverview() {
         >
           {services.map((service) => (
             <motion.div key={service.id} variants={staggerItemVariants}>
-              <Link href={`/services/${service.id}`}>
-                <SpotlightCard className="h-full cursor-pointer">
+              <SpotlightCard className="h-full">
                   <div className="flex flex-col">
                     {/* Icon */}
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -53,7 +52,7 @@ export function ServicesOverview() {
                     </p>
 
                     {/* Features Preview */}
-                    <ul className="mb-4 space-y-1">
+                    <ul className="space-y-1">
                       {service.features.slice(0, 3).map((feature, index) => (
                         <li
                           key={index}
@@ -64,15 +63,9 @@ export function ServicesOverview() {
                         </li>
                       ))}
                     </ul>
-
-                    {/* Learn More */}
-                    <div className="flex items-center gap-1 text-sm font-medium text-primary">
-                      Learn more
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </div>
                   </div>
                 </SpotlightCard>
-              </Link>
+
             </motion.div>
           ))}
         </StaggerChildren>
@@ -80,8 +73,8 @@ export function ServicesOverview() {
         {/* CTA */}
         <FadeIn delay={0.6} className="mt-12 text-center">
           <Button asChild variant="outline" className="rounded-full">
-            <Link href="/services">
-              View All Services
+            <Link href="#contact">
+              Get Started
               <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

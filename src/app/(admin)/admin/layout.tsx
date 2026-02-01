@@ -12,7 +12,7 @@ import {
     Shield,
     Crown,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { NotificationDropdown } from "@/components/admin/NotificationDropdown";
 
 export default function AdminLayout({
