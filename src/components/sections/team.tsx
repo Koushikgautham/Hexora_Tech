@@ -129,7 +129,7 @@ export function Team() {
 
             {/* Right Column - Globe (half visible) */}
             <div className="about-card relative md:col-span-5 md:-mr-6 lg:-mr-8">
-              <div className="relative flex h-full min-h-[400px] flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#111]">
+              <div className="relative flex h-full min-h-[400px] flex-col rounded-2xl border border-white/5 bg-[#111]">
                 <div className="absolute left-0 top-8 z-10 px-8">
                   <p className="mb-1 text-lg font-semibold text-white">
                     Based in Chennai, India
@@ -142,7 +142,7 @@ export function Team() {
                     AVAILABLE WORLDWIDE
                   </p>
                 </div>
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-2xl">
                   <div className="h-[120%] w-[120%] translate-x-[15%]">
                     <Globe
                       markerLat={13.08}

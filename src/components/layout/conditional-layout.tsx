@@ -8,12 +8,13 @@ import { ScrollProgress } from "@/components/layout/scroll-progress";
 export function ConditionalLayout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
 
-    // Check if we're on admin or auth routes
+    // Check if we're on admin, auth, or client routes
     const isAdminRoute = pathname?.startsWith("/admin");
     const isAuthRoute = pathname?.startsWith("/auth");
+    const isClientRoute = pathname?.startsWith("/client");
 
-    // Don't show main website header/footer on admin or auth pages
-    if (isAdminRoute || isAuthRoute) {
+    // Don't show main website header/footer on admin, auth, or client pages
+    if (isAdminRoute || isAuthRoute || isClientRoute) {
         return <>{children}</>;
     }
 

@@ -4,7 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Moon, Sun } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -39,6 +40,7 @@ const handleSmoothScroll = (
 
 export function Header() {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const [isCompact, setIsCompact] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [activeSection, setActiveSection] = React.useState("hero");
@@ -196,10 +198,40 @@ export function Header() {
             {/* Right side - buttons */}
             <div
               className={cn(
-                "hidden items-center gap-6 md:flex flex-shrink-0 transition-all duration-700 ease-in-out pr-2",
+                "hidden items-center gap-4 md:flex flex-shrink-0 transition-all duration-700 ease-in-out pr-2",
                 isCompact ? "opacity-0 scale-95 max-w-0 overflow-hidden" : "opacity-100 scale-100 max-w-xs"
               )}
             >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="h-9 w-9 rounded-lg text-gray-400 hover:text-white hover:bg-white/5"
+              >
+                <AnimatePresence mode="wait">
+                  {theme === "dark" ? (
+                    <motion.div
+                      key="sun"
+                      initial={{ rotate: -90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: 90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Sun className="h-4 w-4" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="moon"
+                      initial={{ rotate: 90, opacity: 0 }}
+                      animate={{ rotate: 0, opacity: 1 }}
+                      exit={{ rotate: -90, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Moon className="h-4 w-4" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </Button>
               <Link
                 href="/auth/login"
                 className="text-sm font-medium text-gray-400 transition-colors hover:text-white whitespace-nowrap"
@@ -278,6 +310,39 @@ export function Header() {
                 transition={{ delay: navItems.length * 0.1 }}
                 className="mt-8 space-y-3"
               >
+                <Button
+                  variant="outline"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="w-full rounded-lg border-white/10 py-3 text-sm font-medium"
+                >
+                  <AnimatePresence mode="wait">
+                    {theme === "dark" ? (
+                      <motion.div
+                        key="sun"
+                        initial={{ rotate: -90, opacity: 0 }}
+                        animate={{ rotate: 0, opacity: 1 }}
+                        exit={{ rotate: 90, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center gap-2"
+                      >
+                        <Sun className="h-4 w-4" />
+                        <span>Light Mode</span>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="moon"
+                        initial={{ rotate: 90, opacity: 0 }}
+                        animate={{ rotate: 0, opacity: 1 }}
+                        exit={{ rotate: -90, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center gap-2"
+                      >
+                        <Moon className="h-4 w-4" />
+                        <span>Dark Mode</span>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Button>
                 <Link
                   href="/auth/login"
                   onClick={() => setIsMobileMenuOpen(false)}
