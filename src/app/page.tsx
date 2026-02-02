@@ -4,7 +4,7 @@ import {
   Process,
   Projects,
   Team,
-  Testimonials,
+  ClientStoriesDeck,
   Contact,
 } from "@/components/sections";
 
@@ -26,8 +26,8 @@ export default function Home() {
       {/* Team - Who we are (includes Globe - heavy 3D component) */}
       <Team />
 
-      {/* Testimonials - Social proof */}
-      <Testimonials />
+      {/* Client Stories - Interactive rotating deck */}
+      <ClientStoriesDeck />
 
       {/* Contact - Get in touch */}
       <Contact />
